@@ -1,42 +1,44 @@
-require_relative 'nameable'
-require_relative 'capitalize_decorator'
-require_relative 'trimmer_decorator'
+require './nameable'
 
-# Person class provides the default implementation of the correct_name method
 class Person < Nameable
-  def initialize(age, name = 'unknown', parent_permission: true)
+  attr_reader :id
+  attr_accessor :name, :age, :rentals
+
+  def initialize(age, parent_permission: true, name: 'Unknown')
     super()
     @id = Random.rand(1..1000)
     @name = name
     @age = age
     @parent_permission = parent_permission
+    @rentals = []
   end
 
-  # Getter and setter in one
-  attr_accessor :name, :age
-
-  # Getter
-  attr_reader :id
+  private
 
   def of_age?
-    @age >= 18
+    return true if @age >= 18
+
+    false
   end
-  private :of_age?
+
+  public
 
   def can_use_services?
-    @parent_permission || of_age?
+    return true if @age || parent_permission == true
+
+    false
   end
 
   def correct_name
     @name
   end
+
+  def rent_book(book, date)
+    rental = Rental.new(self, book, date)
+    book.add_rental(rental)
+  end
+
+  def add_rental(book, date)
+    Rental.new(date, book, self)
+  end
 end
-
-person = Person.new(22, 'maximilianus')
-puts person.correct_name
-
-capitalized_person = CapitalizeDecorator.new(person)
-puts capitalized_person.correct_name
-
-capitalized_trimmed_person = TrimmerDecorator.new(capitalized_person)
-puts capitalized_trimmed_person.correct_name
